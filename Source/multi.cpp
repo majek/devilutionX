@@ -784,7 +784,7 @@ void multi_send_pinfo(int pnum, char cmd)
 {
 	PkPlayerStruct pkplr;
 
-	PackPlayer(&pkplr, myplr, TRUE);
+	PackPlayer(&pkplr, myplr, TRUE, FALSE);
 	dthread_send_delta(pnum, cmd, &pkplr, sizeof(pkplr));
 }
 
@@ -943,7 +943,7 @@ void recv_plrinfo(int pnum, TCmdPlrInfoHdr *p, BOOL recv)
 	sgwPackPlrOffsetTbl[pnum] = 0;
 	multi_player_left_msg(pnum, 0);
 	plr[pnum]._pGFXLoad = 0;
-	UnPackPlayer(&netplr[pnum], pnum, 1);
+	UnPackPlayer(&netplr[pnum], pnum, 1, FALSE);
 
 	if (!recv) {
 #ifdef _DEBUG

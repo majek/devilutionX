@@ -22,7 +22,7 @@ void pfile_write_hero()
 
 	save_num = pfile_get_save_num_from_name(plr[myplr]._pName);
 	if (pfile_open_archive(TRUE, save_num)) {
-		PackPlayer(&pkplr, myplr, gbMaxPlayers == 1);
+		PackPlayer(&pkplr, myplr, gbMaxPlayers == 1, TRUE);
 		pfile_encode_hero(&pkplr);
 		pfile_flush(gbMaxPlayers == 1, save_num);
 	}
@@ -202,7 +202,7 @@ BOOL __stdcall pfile_ui_set_hero_infos(BOOL(__stdcall *ui_add_hero_info)(_uihero
 			if (pfile_read_hero(archive, &pkplr)) {
 				_uiheroinfo uihero;
 				strcpy(hero_names[i], pkplr.pName);
-				UnPackPlayer(&pkplr, 0, FALSE);
+				UnPackPlayer(&pkplr, 0, FALSE, TRUE);
 				game_2_ui_player(plr, &uihero, pfile_archive_contains_game(archive, i));
 				ui_add_hero_info(&uihero);
 			}
@@ -339,7 +339,7 @@ BOOL __stdcall pfile_ui_save_create(_uiheroinfo *heroinfo)
 	CreatePlayer(0, cl);
 	strncpy(plr[0]._pName, heroinfo->name, PLR_NAME_LEN);
 	plr[0]._pName[PLR_NAME_LEN - 1] = '\0';
-	PackPlayer(&pkplr, 0, TRUE);
+	PackPlayer(&pkplr, 0, TRUE, TRUE);
 	pfile_encode_hero(&pkplr);
 	game_2_ui_player(&plr[0], heroinfo, FALSE);
 	pfile_flush(TRUE, save_num);
@@ -398,7 +398,7 @@ void pfile_read_player_from_save()
 	if (!pfile_read_hero(archive, &pkplr))
 		app_fatal("Unable to load character");
 
-	UnPackPlayer(&pkplr, myplr, FALSE);
+	UnPackPlayer(&pkplr, myplr, FALSE, TRUE);
 	gbValidSaveFile = pfile_archive_contains_game(archive, save_num);
 	pfile_SFileCloseArchive(archive);
 }
