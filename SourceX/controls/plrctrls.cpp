@@ -1,6 +1,10 @@
 #include "controls/plrctrls.h"
 
 #include <cstdint>
+#include <iostream>
+#include <ctime>
+#include <ratio>
+#include <chrono>
 
 #include "controls/controller_motion.h"
 #include "controls/game_controls.h"
@@ -58,14 +62,69 @@ int GetRoteryDistance(int x, int y)
 }
 
 /**
- * @brief Get walking distance to cordinate
- * @param x Tile coordinates
- * @param y Tile coordinates
+ * @brief perform a single step of A* bread-first search by trying to step in every possible direction from pPath with goal (x,y). Check each step with PosOk
+ *
+ * @return FALSE if we ran out of preallocated nodes to use, else TRUE
  */
-int GetDistance(int x, int y)
+BOOL path_get_path_limit(PATHNODE *pPath, int x, int y)
 {
-	char walkpath[25];
-	return FindPath(PosOkPlayer, myplr, plr[myplr]._px, plr[myplr]._py, x, y, walkpath);
+	int dx, dy;
+	int i;
+	BOOL ok;
+
+	for (i = 0; i < 8; i++) {
+		dx = pPath->x + pathxdir[i];
+		dy = pPath->y + pathydir[i];
+		ok = PosOkPlayer(myplr, dx, dy);
+		if (ok && path_solid_pieces(pPath, dx, dy) || !ok && dx == x && dy == y) {
+			if (!path_parent_path(pPath, dx, dy, x, y))
+				return false;
+		}
+	}
+
+	return true;
+}
+
+/**
+ * @brief Get walking distance to cordinate
+ * @param dx Tile coordinates
+ * @param dy Tile coordinates
+ */
+int GetDistance(int dx, int dy, int maxDistance)
+{
+	PATHNODE *path_start, *next_node;
+	int path_length;
+	int sx = plr[myplr]._px;
+	int sy = plr[myplr]._py;
+
+	// clear all nodes, create root nodes for the visited/frontier linked lists
+	gdwCurNodes = 0;
+	path_2_nodes = path_new_step();
+	pnode_ptr = path_new_step();
+	gdwCurPathStep = 0;
+	path_start = path_new_step();
+	path_start->g = 0;
+	path_start->h = path_get_h_cost(sx, sy, dx, dy);
+	path_start->x = sx;
+	path_start->f = path_start->h + path_start->g;
+	path_start->y = sy;
+	path_2_nodes->NextNode = path_start;
+	// A* search until we find (dx,dy) or fail
+	while (next_node = GetNextPath()) {
+		// reached the end, success!
+		if (next_node->x == dx && next_node->y == dy)
+			break;
+		if (next_node->f > maxDistance + 2)
+			continue;
+		printf("%d > %d + 1\n", next_node->f, maxDistance);
+		// ran out of nodes, abort!
+		if (!path_get_path_limit(next_node, dx, dy))
+			return 0;
+	}
+	// frontier is empty, no path!
+	if (!next_node)
+		return 0;
+	return next_node->f;
 }
 
 /**
@@ -131,7 +190,7 @@ void CheckTownersNearby()
 	for (int i = 0; i < 16; i++) {
 		if (GetDistanceRanged(towner[i]._tx, towner[i]._ty) > 6)
 			continue;
-		int distance = GetDistance(towner[i]._tx, towner[i]._ty);
+		int distance = GetDistance(towner[i]._tx, towner[i]._ty, 6);
 		if (distance == 0 || distance > 2)
 			continue;
 		pcursmonst = i;
@@ -151,10 +210,12 @@ bool HasRangedSpell()
 
 void CheckMonstersNearby()
 {
+	using namespace std::chrono;
 	int newRotations, newDdistance;
 	int distance = 2 * (MAXDUNX + MAXDUNY);
 	int rotations = 5;
 
+	high_resolution_clock::time_point t1 = high_resolution_clock::now();
 	// The first MAX_PLRS monsters are reserved for players' golems.
 	for (int i = MAX_PLRS; i < MAXMONSTERS; i++) {
 		const auto &monst = monster[i];
@@ -170,12 +231,12 @@ void CheckMonstersNearby()
 		if (plr[myplr]._pwtype == WT_RANGED || HasRangedSpell())
 			newDdistance = GetDistanceRanged(mx, my);
 		else
-			newDdistance = GetDistance(mx, my);
+			newDdistance = GetDistance(mx, my, distance);
 
-		if (newDdistance == 0 || distance < newDdistance || (pcursmonst != -1 && CanTalkToMonst(i))) {
+		if (newDdistance == 0 || distance + 2 < newDdistance || (pcursmonst != -1 && CanTalkToMonst(i))) {
 			continue;
 		}
-		if (distance == newDdistance) {
+		if (distance + 2 >= newDdistance) {
 			newRotations = GetRoteryDistance(mx, my);
 			if (rotations < newRotations)
 				continue;
@@ -184,6 +245,9 @@ void CheckMonstersNearby()
 		rotations = newRotations;
 		pcursmonst = i;
 	}
+	high_resolution_clock::time_point t2 = high_resolution_clock::now();
+	duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
+	printf("%8f \n", time_span.count());
 }
 
 void CheckPlayerNearby()
@@ -212,7 +276,7 @@ void CheckPlayerNearby()
 		if (plr[myplr]._pwtype == WT_RANGED || HasRangedSpell() || spl == SPL_HEALOTHER)
 			newDdistance = GetDistanceRanged(mx, my);
 		else
-			newDdistance = GetDistance(mx, my);
+			newDdistance = GetDistance(mx, my, distance);
 
 		if (newDdistance == 0 || distance < newDdistance) {
 			continue;
