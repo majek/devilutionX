@@ -513,6 +513,24 @@ void engine_draw_pixel(int sx, int sy)
 		*dst = gbPixelCol;
 }
 
+void DrawSolidRectangle(int x0, int dx, int y0, int dy, int color) {
+	char* WorkingSurface = (char*)gpBuffer;
+	for (int x = x0; x < x0 + dx; x++) {
+		for (int y = y0; y < y0 + dy; y++) {
+			WorkingSurface[y*768+x] = color;
+		}
+	}
+}
+
+int CalculateTextWidth(char* s)
+{
+	int l = 0;
+	while (*s) {
+		l += fontkern[fontframe[gbFontTransTbl[*s++]]] + 1;
+	}
+	return l;
+}
+
 // Exact copy from https://github.com/erich666/GraphicsGems/blob/dad26f941e12c8bf1f96ea21c1c04cd2206ae7c9/gems/DoubleLine.c
 // Except:
 // * not in view checks
