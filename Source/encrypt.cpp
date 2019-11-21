@@ -80,6 +80,7 @@ int PkwareCompress(void *buf, int size)
 
 	srcData = (BYTE *)buf;
 	ptr = (char *)DiabloAllocPtr(CMP_BUFFER_SIZE);
+        memset(ptr, 0, CMP_BUFFER_SIZE);
 
 	destSize = 2 * size;
 	if (destSize < 8192)

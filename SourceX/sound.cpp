@@ -38,7 +38,7 @@ char *sgszMusicTracks[NUM_MUSIC] = {
 
 BOOL snd_playing(TSnd *pSnd)
 {
-	DWORD dwStatus;
+	DWORD dwStatus = 0;
 
 	if (!pSnd)
 		return false;

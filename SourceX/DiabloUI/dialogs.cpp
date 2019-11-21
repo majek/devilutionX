@@ -38,10 +38,12 @@ void DialogActionOK()
 	state = State::OK;
 }
 
+#ifdef SPAWN
 void DialogActionCancel()
 {
 	state = State::CANCEL;
 }
+#endif
 
 constexpr auto DIALOG_ART_S = UiImage(&dialogArt, { 180, 168, 280, 144 });
 constexpr auto DIALOG_ART_L = UiImage(&dialogArt, { 127, 100, 385, 280 });
@@ -59,13 +61,13 @@ UiItem OK_DIALOG_WITH_CAPTION[] = {
 	MakeSmlButton("OK", &DialogActionOK, 264, 335),
 };
 
+#ifdef SPAWN
 UiItem PROGRESS_DIALOG[] = {
 	DIALOG_ART_S,
 	UiText(dialogText, { 180, 177, 280, 43 }, UIS_CENTER),
 	UiImage(&progressArt, { 205, 220, 228, 38 }),
 	MakeSmlButton("Cancel", &DialogActionCancel, 330, 265),
 };
-
 UiListItem SELOK_DIALOG_ITEMS[] = {
 	{ "OK", 0 }
 };
@@ -78,6 +80,7 @@ UiItem SPAWNERR_DIALOG[] = {
 	UiText("The Rogue and Sorcerer are only available in the full retail version of Diablo. For ordering information visit https://www.gog.com/game/diablo.", { 140, 199, 400, 177 }),
 	UiArtTextButton("OK", &DialogActionOK, { 230, 407, 180, 43 }),
 };
+#endif
 
 // clang-format off
 #define BLANKCOLOR { 0, 0xFF, 0, 0 }
