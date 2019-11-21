@@ -1069,7 +1069,7 @@ void PressKey(int vkey)
 			sfx_stop();
 		}
 		questlog = FALSE;
-		automapflag = 0;
+		// automapflag = 0;
 		msgdelay = 0;
 		gamemenu_off();
 		doom_close();
