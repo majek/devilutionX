@@ -108,6 +108,8 @@ void PackPlayer(PkPlayerStruct *pPack, int pnum, BOOL manashield, BOOL savefile)
 
         // MM
         if (savefile) {
+                pPack->bReserved[0] = pPlayer->_pRSpell;
+                pPack->bReserved[1] = pPlayer->_pRSplType;
                 for (i = 0; i < 4; i++) {
                         pPack->wReserved[i] = pPlayer->_pSplHotKey[i];
                         pPack->wReserved[i+4] = pPlayer->_pSplTHotKey[i];
@@ -259,9 +261,16 @@ void UnPackPlayer(PkPlayerStruct *pPack, int pnum, BOOL killok, BOOL savefile)
 
         // MM
         if (savefile) {
+                int spell = pPack->bReserved[0];
+                int spellT = pPack->bReserved[1];
+                if (spell > 0 && spell < MAX_SPELLS &&
+                    spellT >=0 && spellT < RSPLTYPE_INVALID) {
+                        pPlayer->_pRSpell = spell;
+                        pPlayer->_pRSplType = spellT;
+                }
                 for (i = 0; i < 4; i++) {
-                        int spell = pPack->wReserved[i];
-                        int spellT = pPack->wReserved[i+4];
+                        spell = pPack->wReserved[i];
+                        spellT = pPack->wReserved[i+4];
                         if (spell > 0 && spell < MAX_SPELLS &&
                             spellT >=0 && spellT < RSPLTYPE_INVALID) {
                                 pPlayer->_pSplHotKey[i] = spell;

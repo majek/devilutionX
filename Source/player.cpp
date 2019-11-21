@@ -846,10 +846,12 @@ void InitPlayer(int pnum, BOOL FirstTime)
 	ClearPlrRVars(&plr[pnum]);
 
 	if (FirstTime) {
-		plr[pnum]._pRSpell = SPL_INVALID;
+                if (plr[pnum]._pRSpell <= 0 || plr[pnum]._pRSpell >= MAX_SPELLS || plr[pnum]._pRSplType < 0 || plr[pnum]._pRSplType >= RSPLTYPE_INVALID) {
+                        plr[pnum]._pRSpell = SPL_INVALID;
+                        plr[pnum]._pRSplType = RSPLTYPE_INVALID;
+                }
 		plr[pnum]._pSBkSpell = SPL_INVALID;
 		plr[pnum]._pSpell = SPL_INVALID;
-		plr[pnum]._pRSplType = RSPLTYPE_INVALID;
 		plr[pnum]._pSplType = RSPLTYPE_INVALID;
 		if ((plr[pnum]._pgfxnum & 0xF) == ANIM_ID_BOW) {
 			plr[pnum]._pwtype = WT_RANGED;
