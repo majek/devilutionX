@@ -1025,7 +1025,8 @@ void PressKey(int vkey)
 			sfx_stop();
 		}
 		questlog = FALSE;
-		automapflag = FALSE;
+                // MM: disable automap clearing on space
+		// automapflag = 0;
 		msgdelay = 0;
 		gamemenu_off();
 		doom_close();
