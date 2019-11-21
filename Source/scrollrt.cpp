@@ -1036,6 +1036,10 @@ void DrawMonsterHealthBar(int monsterID)
 	static const unsigned short resists[] = { 0x1, 0x2, 0x4 };
 	static const bool cheat = false;
 
+        if (leveltype == DTYPE_TOWN) {
+                return;
+        }
+
 	if (!monster[monsterID].MData) {
 		return;
 	}
