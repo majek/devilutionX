@@ -433,6 +433,8 @@ void DrawAutomapTile(int sx, int sy, WORD automap_type)
 
 void DrawAutomapPlr()
 {
+        int plrno;
+
 	int px, py;
 	int x, y;
 
@@ -458,6 +460,38 @@ void DrawAutomapPlr()
 	if (chrflag || questlog)
 		x += 160;
 	y -= AmLine8;
+
+        // MM
+        {
+                int plrno;
+                for (plrno = 0; plrno < MAX_PLRS; plrno++) {
+                        if (currlevel != plr[plrno].plrlevel) {
+                                continue;
+                        }
+                        int x = plr[plrno].WorldX;
+                        int y = plr[plrno].WorldY;
+                        int px = x - 2 * AutoMapXOfs - ViewX;
+                        int py = y - 2 * AutoMapYOfs - ViewY;
+
+                        x = (plr[plrno]._pxoff * AutoMapScale / 100 >> 1) + (ScrollInfo._sxoff * AutoMapScale / 100 >> 1) + (px - py) * AmLine16 + 384;
+                        y = (plr[plrno]._pyoff * AutoMapScale / 100 >> 1) + (ScrollInfo._syoff * AutoMapScale / 100 >> 1) + (px + py) * AmLine8 + 336;
+
+                        if (invflag || sbookflag)
+                                x -= 160;
+                        if (chrflag || questlog)
+                                x += 160;
+                        y -= AmLine8;
+
+                        if (plrno != myplr) {
+                                /* Draw cross for other players in game */
+                                int t = AmLine16 / 6;
+                                int l = AmLine16 / 4;
+
+                                DrawLine(x-l, y-t, x + l, y + l, COLOR_PLAYER);
+                                DrawLine(x-l, y+l, x + l, y - t, COLOR_PLAYER);
+                        }
+                }
+        }
 
 	switch (plr[myplr]._pdir) {
 	case DIR_N:
