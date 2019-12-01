@@ -1385,6 +1385,13 @@ static void DrawMain(int dwHgt, BOOL draw_desc, BOOL draw_hp, BOOL draw_mana, BO
 	ysize = dwHgt;
 
 	if (!gbActive) {
+                static int last_frame = 0;
+                int now = SDL_GetTicks();
+                int desired = 16;
+                if (now - last_frame < desired) {
+                        SDL_Delay(desired - (now - last_frame));
+                }
+                last_frame = now;
 		return;
 	}
 
