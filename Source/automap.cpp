@@ -433,74 +433,95 @@ void DrawAutomapType(int sx, int sy, WORD automap_type)
 
 void DrawAutomapPlr()
 {
+        int plrno;
+
 	int px, py;
 	int x, y;
 
-	if (plr[myplr]._pmode == PM_WALK3) {
-		x = plr[myplr]._px;
-		y = plr[myplr]._py;
-		if (plr[myplr]._pdir == DIR_W)
-			x++;
-		else
-			y++;
-	} else {
-		x = plr[myplr].WorldX;
-		y = plr[myplr].WorldY;
-	}
-	px = x - 2 * AutoMapXOfs - ViewX;
-	py = y - 2 * AutoMapYOfs - ViewY;
+        for (plrno = 0; plrno < MAX_PLRS; plrno++) {
+                if (currlevel != plr[plrno].plrlevel) {
+                        continue;
+                }
+                if (!FriendlyMode && plrno != myplr) {
+                        continue;
+                }
 
-	x = (plr[myplr]._pxoff * AutoMapScale / 100 >> 1) + (ScrollInfo._sxoff * AutoMapScale / 100 >> 1) + (px - py) * AutoMapYPos + 384;
-	y = (plr[myplr]._pyoff * AutoMapScale / 100 >> 1) + (ScrollInfo._syoff * AutoMapScale / 100 >> 1) + (px + py) * AMPlayerX + 336;
+                if (plr[plrno]._pmode == PM_WALK3) {
+                        x = plr[plrno]._px;
+                        y = plr[plrno]._py;
+                        if (plr[plrno]._pdir == DIR_W)
+                                x++;
+                        else
+                                y++;
+                } else {
+                        x = plr[plrno].WorldX;
+                        y = plr[plrno].WorldY;
+                }
+                px = x - 2 * AutoMapXOfs - ViewX;
+                py = y - 2 * AutoMapYOfs - ViewY;
 
-	if (invflag || sbookflag)
-		x -= 160;
-	if (chrflag || questlog)
-		x += 160;
-	y -= AMPlayerX;
+                x = (plr[plrno]._pxoff * AutoMapScale / 100 >> 1) + (ScrollInfo._sxoff * AutoMapScale / 100 >> 1) + (px - py) * AutoMapYPos + 384;
+                y = (plr[plrno]._pyoff * AutoMapScale / 100 >> 1) + (ScrollInfo._syoff * AutoMapScale / 100 >> 1) + (px + py) * AMPlayerX + 336;
 
-	switch (plr[myplr]._pdir) {
-	case DIR_N:
-		DrawLine(x, y, x, y - AutoMapYPos, COLOR_PLAYER);
-		DrawLine(x, y - AutoMapYPos, x - AMPlayerY, y - AMPlayerX, COLOR_PLAYER);
-		DrawLine(x, y - AutoMapYPos, x + AMPlayerY, y - AMPlayerX, COLOR_PLAYER);
-		break;
-	case DIR_NE:
-		DrawLine(x, y, x + AutoMapYPos, y - AMPlayerX, COLOR_PLAYER);
-		DrawLine(x + AutoMapYPos, y - AMPlayerX, x + AMPlayerX, y - AMPlayerX, COLOR_PLAYER);
-		DrawLine(x + AutoMapYPos, y - AMPlayerX, x + AMPlayerX + AMPlayerY, y, COLOR_PLAYER);
-		break;
-	case DIR_E:
-		DrawLine(x, y, x + AutoMapYPos, y, COLOR_PLAYER);
-		DrawLine(x + AutoMapYPos, y, x + AMPlayerX, y - AMPlayerY, COLOR_PLAYER);
-		DrawLine(x + AutoMapYPos, y, x + AMPlayerX, y + AMPlayerY, COLOR_PLAYER);
-		break;
-	case DIR_SE:
-		DrawLine(x, y, x + AutoMapYPos, y + AMPlayerX, COLOR_PLAYER);
-		DrawLine(x + AutoMapYPos, y + AMPlayerX, x + AMPlayerX + AMPlayerY, y, COLOR_PLAYER);
-		DrawLine(x + AutoMapYPos, y + AMPlayerX, x + AMPlayerX, y + AMPlayerX, COLOR_PLAYER);
-		break;
-	case DIR_S:
-		DrawLine(x, y, x, y + AutoMapYPos, COLOR_PLAYER);
-		DrawLine(x, y + AutoMapYPos, x + AMPlayerY, y + AMPlayerX, COLOR_PLAYER);
-		DrawLine(x, y + AutoMapYPos, x - AMPlayerY, y + AMPlayerX, COLOR_PLAYER);
-		break;
-	case DIR_SW:
-		DrawLine(x, y, x - AutoMapYPos, y + AMPlayerX, COLOR_PLAYER);
-		DrawLine(x - AutoMapYPos, y + AMPlayerX, x - AMPlayerY - AMPlayerX, y, COLOR_PLAYER);
-		DrawLine(x - AutoMapYPos, y + AMPlayerX, x - AMPlayerX, y + AMPlayerX, COLOR_PLAYER);
-		break;
-	case DIR_W:
-		DrawLine(x, y, x - AutoMapYPos, y, COLOR_PLAYER);
-		DrawLine(x - AutoMapYPos, y, x - AMPlayerX, y - AMPlayerY, COLOR_PLAYER);
-		DrawLine(x - AutoMapYPos, y, x - AMPlayerX, y + AMPlayerY, COLOR_PLAYER);
-		break;
-	case DIR_NW:
-		DrawLine(x, y, x - AutoMapYPos, y - AMPlayerX, COLOR_PLAYER);
-		DrawLine(x - AutoMapYPos, y - AMPlayerX, x - AMPlayerX, y - AMPlayerX, COLOR_PLAYER);
-		DrawLine(x - AutoMapYPos, y - AMPlayerX, x - AMPlayerY - AMPlayerX, y, COLOR_PLAYER);
-		break;
-	}
+                if (invflag || sbookflag)
+                        x -= 160;
+                if (chrflag || questlog)
+                        x += 160;
+                y -= AMPlayerX;
+
+                if (plrno != myplr) {
+                        /* Draw cross for other players in game */
+                        int t = AutoMapYPos / 6;
+                        int l = AutoMapYPos / 4;
+
+                        DrawLine(x-l, y-t, x + l, y + l, COLOR_PLAYER);
+                        DrawLine(x-l, y+l, x + l, y - t, COLOR_PLAYER);
+                        continue;
+                }
+
+                switch (plr[plrno]._pdir) {
+                case DIR_N:
+                        DrawLine(x, y, x, y - AutoMapYPos, COLOR_PLAYER);
+                        DrawLine(x, y - AutoMapYPos, x - AMPlayerY, y - AMPlayerX, COLOR_PLAYER);
+                        DrawLine(x, y - AutoMapYPos, x + AMPlayerY, y - AMPlayerX, COLOR_PLAYER);
+                        break;
+                case DIR_NE:
+                        DrawLine(x, y, x + AutoMapYPos, y - AMPlayerX, COLOR_PLAYER);
+                        DrawLine(x + AutoMapYPos, y - AMPlayerX, x + AMPlayerX, y - AMPlayerX, COLOR_PLAYER);
+                        DrawLine(x + AutoMapYPos, y - AMPlayerX, x + AMPlayerX + AMPlayerY, y, COLOR_PLAYER);
+                        break;
+                case DIR_E:
+                        DrawLine(x, y, x + AutoMapYPos, y, COLOR_PLAYER);
+                        DrawLine(x + AutoMapYPos, y, x + AMPlayerX, y - AMPlayerY, COLOR_PLAYER);
+                        DrawLine(x + AutoMapYPos, y, x + AMPlayerX, y + AMPlayerY, COLOR_PLAYER);
+                        break;
+                case DIR_SE:
+                        DrawLine(x, y, x + AutoMapYPos, y + AMPlayerX, COLOR_PLAYER);
+                        DrawLine(x + AutoMapYPos, y + AMPlayerX, x + AMPlayerX + AMPlayerY, y, COLOR_PLAYER);
+                        DrawLine(x + AutoMapYPos, y + AMPlayerX, x + AMPlayerX, y + AMPlayerX, COLOR_PLAYER);
+                        break;
+                case DIR_S:
+                        DrawLine(x, y, x, y + AutoMapYPos, COLOR_PLAYER);
+                        DrawLine(x, y + AutoMapYPos, x + AMPlayerY, y + AMPlayerX, COLOR_PLAYER);
+                        DrawLine(x, y + AutoMapYPos, x - AMPlayerY, y + AMPlayerX, COLOR_PLAYER);
+                        break;
+                case DIR_SW:
+                        DrawLine(x, y, x - AutoMapYPos, y + AMPlayerX, COLOR_PLAYER);
+                        DrawLine(x - AutoMapYPos, y + AMPlayerX, x - AMPlayerY - AMPlayerX, y, COLOR_PLAYER);
+                        DrawLine(x - AutoMapYPos, y + AMPlayerX, x - AMPlayerX, y + AMPlayerX, COLOR_PLAYER);
+                        break;
+                case DIR_W:
+                        DrawLine(x, y, x - AutoMapYPos, y, COLOR_PLAYER);
+                        DrawLine(x - AutoMapYPos, y, x - AMPlayerX, y - AMPlayerY, COLOR_PLAYER);
+                        DrawLine(x - AutoMapYPos, y, x - AMPlayerX, y + AMPlayerY, COLOR_PLAYER);
+                        break;
+                case DIR_NW:
+                        DrawLine(x, y, x - AutoMapYPos, y - AMPlayerX, COLOR_PLAYER);
+                        DrawLine(x - AutoMapYPos, y - AMPlayerX, x - AMPlayerX, y - AMPlayerX, COLOR_PLAYER);
+                        DrawLine(x - AutoMapYPos, y - AMPlayerX, x - AMPlayerY - AMPlayerX, y, COLOR_PLAYER);
+                        break;
+                }
+        }
 }
 
 WORD GetAutomapType(int x, int y, BOOL view)
