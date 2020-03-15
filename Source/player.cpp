@@ -747,6 +747,7 @@ void NextPlrLevel(int pnum)
 
 	if (pnum == myplr) {
 		drawmanaflag = TRUE;
+		PlaySFX(IS_QUESTDN);
 	}
 
 	if (sgbControllerActive)
@@ -845,10 +846,12 @@ void InitPlayer(int pnum, BOOL FirstTime)
 	ClearPlrRVars(&plr[pnum]);
 
 	if (FirstTime) {
-		plr[pnum]._pRSpell = SPL_INVALID;
+                if (plr[pnum]._pRSpell <= 0 || plr[pnum]._pRSpell >= MAX_SPELLS || plr[pnum]._pRSplType < 0 || plr[pnum]._pRSplType >= RSPLTYPE_INVALID) {
+                        plr[pnum]._pRSpell = SPL_INVALID;
+                        plr[pnum]._pRSplType = RSPLTYPE_INVALID;
+                }
 		plr[pnum]._pSBkSpell = SPL_INVALID;
 		plr[pnum]._pSpell = SPL_INVALID;
-		plr[pnum]._pRSplType = RSPLTYPE_INVALID;
 		plr[pnum]._pSplType = RSPLTYPE_INVALID;
 		if ((plr[pnum]._pgfxnum & 0xF) == ANIM_ID_BOW) {
 			plr[pnum]._pwtype = WT_RANGED;
@@ -1210,11 +1213,24 @@ void PM_ChangeOffset(int pnum)
 	}
 
 	plr[pnum]._pVar8++;
+	if (currlevel == 0) {
+		plr[pnum]._pVar8++;
+	}
 	px = plr[pnum]._pVar6 / 256;
 	py = plr[pnum]._pVar7 / 256;
 
-	plr[pnum]._pVar6 += plr[pnum]._pxvel;
-	plr[pnum]._pVar7 += plr[pnum]._pyvel;
+	// speedup run animation: //TODO bad place
+	if (currlevel == 0) {
+		if (plr[pnum]._pAnimFrame % 2 == 1) {
+			plr[pnum]._pAnimFrame++;
+		}
+		if (plr[pnum]._pAnimFrame >= plr[pnum]._pWFrames) {
+			plr[pnum]._pAnimFrame = 0;
+		}
+	}
+
+	plr[pnum]._pVar6 += (currlevel == 0 ? 2 : 1) * plr[pnum]._pxvel;
+	plr[pnum]._pVar7 += (currlevel == 0 ? 2 : 1) * plr[pnum]._pyvel;
 	plr[pnum]._pxoff = plr[pnum]._pVar6 / 256;
 	plr[pnum]._pyoff = plr[pnum]._pVar7 / 256;
 

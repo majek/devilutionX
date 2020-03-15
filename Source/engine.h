@@ -24,9 +24,15 @@ inline BYTE *CelGetFrameStart(BYTE *pCelBuff, int nCel)
 inline BYTE *CelGetFrame(BYTE *pCelBuff, int nCel, int *nDataSize)
 {
 	DWORD nCellStart;
+  
+       DWORD *pFrameTable;
+       pFrameTable = (DWORD *)pCelBuff;
+       nCellStart = SwapLE32(pFrameTable[nCel]);
+       *nDataSize = SwapLE32(pFrameTable[nCel + 1]) - nCellStart;
+	
 
-	nCellStart = LOAD_LE32(&pCelBuff[nCel * 4]);
-	*nDataSize = LOAD_LE32(&pCelBuff[(nCel+1) * 4]) - nCellStart;
+	/* nCellStart = LOAD_LE32(&pCelBuff[nCel * 4]); */
+	/* *nDataSize = LOAD_LE32(&pCelBuff[(nCel+1) * 4]) - nCellStart; */
 	return pCelBuff + nCellStart;
 }
 
@@ -56,6 +62,8 @@ void CelDrawLightRedSafe(int sx, int sy, BYTE *pCelBuff, int nCel, int nWidth, c
 void CelBlitWidth(BYTE *pBuff, int x, int y, int wdt, BYTE *pCelBuff, int nCel, int nWidth);
 void CelBlitOutline(char col, int sx, int sy, BYTE *pCelBuff, int nCel, int nWidth);
 void ENG_set_pixel(int sx, int sy, BYTE col);
+void DrawSolidRectangle(int x0, int dx, int y0, int dy, int color);
+int CalculateTextWidth(char* s);
 void engine_draw_pixel(int sx, int sy);
 void DrawLine(int x0, int y0, int x1, int y1, BYTE col);
 int GetDirection(int x1, int y1, int x2, int y2);

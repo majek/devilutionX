@@ -1402,8 +1402,12 @@ typedef struct PkPlayerStruct {
 	char pLvlLoad;
 	char pBattleNet;
 	BOOLEAN pManaShield;
+
+	// bReserved is reused to save _pRSpell in multi.sv
 	char bReserved[3];
+	// wReserved is reused to save _pSplHotKey and _pSplTHotKey in multi.sv
 	short wReserved[8];
+
 	int pDiabloKillLevel;
 	int dwReserved[7];
 } PkPlayerStruct;

@@ -459,6 +459,21 @@ void DrawAutomapPlr()
 		x += 160;
 	y -= AmLine8;
 
+        // MM
+        {
+                int plrno;
+                for (plrno = 0; plrno < MAX_PLRS; plrno++) {
+                        if (plrno != myplr) {
+                                /* Draw cross for other players in game */
+                                int t = AmLine16 / 6;
+                                int l = AmLine16 / 4;
+
+                                DrawLine(x-l, y-t, x + l, y + l, COLOR_PLAYER);
+                                DrawLine(x-l, y+l, x + l, y - t, COLOR_PLAYER);
+                        }
+                }
+        }
+
 	switch (plr[myplr]._pdir) {
 	case DIR_N:
 		DrawLine(x, y, x, y - AmLine16, COLOR_PLAYER);

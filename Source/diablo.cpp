@@ -17,6 +17,7 @@ BOOL gbRunGame;
 int glMid3Seed[NUMLEVELS];
 BOOL gbRunGameResult;
 BOOL zoomflag;
+bool drawitems;
 BOOL gbProcessPlayers;
 int glEndSeed[NUMLEVELS];
 BOOL gbLoadGame;
@@ -659,8 +660,10 @@ BOOL LeftMouseCmd(BOOL bShift)
 			NetSendCmdLocParam1(TRUE, invflag ? CMD_GOTOGETITEM : CMD_GOTOAGETITEM, cursmx, cursmy, pcursitem);
 		if (pcursmonst != -1)
 			NetSendCmdLocParam1(TRUE, CMD_TALKXY, cursmx, cursmy, pcursmonst);
-		if (pcursitem == -1 && pcursmonst == -1 && pcursplr == -1)
+		if (pcursitem == -1 && pcursmonst == -1 && pcursplr == -1) {
+			track_lmb_loc(CMD_WALKXY, cursmx, cursmy);
 			return TRUE;
+		}
 	} else {
 		bNear = abs(plr[myplr].WorldX - cursmx) < 2 && abs(plr[myplr].WorldY - cursmy) < 2;
 		if (pcursitem != -1 && pcurs == CURSOR_HAND && !bShift) {
@@ -669,12 +672,15 @@ BOOL LeftMouseCmd(BOOL bShift)
 			NetSendCmdLocParam1(TRUE, pcurs == CURSOR_DISARM ? CMD_DISARMXY : CMD_OPOBJXY, cursmx, cursmy, pcursobj);
 		} else if (plr[myplr]._pwtype == WT_RANGED) {
 			if (bShift) {
-				NetSendCmdLoc(TRUE, CMD_RATTACKXY, cursmx, cursmy);
+				track_lmb_loc(CMD_RATTACKXY, cursmx, cursmy);
+				return TRUE;
 			} else if (pcursmonst != -1) {
 				if (CanTalkToMonst(pcursmonst)) {
-					NetSendCmdParam1(TRUE, CMD_ATTACKID, pcursmonst);
+					track_lmb_param1(CMD_ATTACKID, pcursmonst);
+					return TRUE;
 				} else {
-					NetSendCmdParam1(TRUE, CMD_RATTACKID, pcursmonst);
+					track_lmb_param1(CMD_RATTACKID, pcursmonst);
+					return TRUE;
 				}
 			} else if (pcursplr != -1 && !FriendlyMode) {
 				NetSendCmdParam1(TRUE, CMD_RATTACKPID, pcursplr);
@@ -683,21 +689,27 @@ BOOL LeftMouseCmd(BOOL bShift)
 			if (bShift) {
 				if (pcursmonst != -1) {
 					if (CanTalkToMonst(pcursmonst)) {
-						NetSendCmdParam1(TRUE, CMD_ATTACKID, pcursmonst);
+						track_lmb_param1(CMD_ATTACKID, pcursmonst);
+						return TRUE;
 					} else {
-						NetSendCmdLoc(TRUE, CMD_SATTACKXY, cursmx, cursmy);
+						track_lmb_loc(CMD_SATTACKXY, cursmx, cursmy);
+						return TRUE;
 					}
 				} else {
-					NetSendCmdLoc(TRUE, CMD_SATTACKXY, cursmx, cursmy);
+					track_lmb_loc(CMD_SATTACKXY, cursmx, cursmy);
+					return TRUE;
 				}
 			} else if (pcursmonst != -1) {
-				NetSendCmdParam1(TRUE, CMD_ATTACKID, pcursmonst);
+				track_lmb_param1(CMD_ATTACKID, pcursmonst);
+				return TRUE;
 			} else if (pcursplr != -1 && !FriendlyMode) {
 				NetSendCmdParam1(TRUE, CMD_ATTACKPID, pcursplr);
 			}
 		}
-		if (!bShift && pcursitem == -1 && pcursobj == -1 && pcursmonst == -1 && pcursplr == -1)
+		if (!bShift && pcursitem == -1 && pcursobj == -1 && pcursmonst == -1 && pcursplr == -1) {
+			track_lmb_loc(CMD_WALKXY, cursmx, cursmy);
 			return TRUE;
+		}
 	}
 
 	return FALSE;
@@ -819,6 +831,9 @@ void ReleaseKey(int vkey)
 {
 	if (vkey == VK_SNAPSHOT)
 		CaptureScreen();
+
+	if (vkey == VK_MENU || vkey == VK_LMENU || vkey == VK_RMENU)
+		drawitems = false;
 }
 
 void PressKey(int vkey)
@@ -992,6 +1007,8 @@ void PressKey(int vkey)
 		if (stextflag) {
 			STextNext();
 		}
+	} else if(vkey == VK_MENU || vkey == VK_LMENU || vkey == VK_RMENU) {
+		drawitems = true;
 	} else if (vkey == VK_LEFT) {
 		if (automapflag && !talkflag) {
 			AutomapLeft();
@@ -1019,7 +1036,7 @@ void PressKey(int vkey)
 			sfx_stop();
 		}
 		questlog = FALSE;
-		automapflag = FALSE;
+		// automapflag = FALSE;
 		msgdelay = 0;
 		gamemenu_off();
 		doom_close();
@@ -1199,7 +1216,7 @@ void PressChar(int vkey)
 		return;
 	case '*':
 	case '8':
-#ifdef _DEBUG
+#if 0
 		if (debug_mode_key_inverted_v || debug_mode_key_w) {
 			NetSendCmd(TRUE, CMD_CHEAT_EXPERIENCE);
 			return;
@@ -1209,7 +1226,7 @@ void PressChar(int vkey)
 			UseInvItem(myplr, INVITEM_BELT_FIRST + 7);
 		}
 		return;
-#ifdef _DEBUG
+#if 0
 	case ')':
 	case '0':
 		if (debug_mode_key_inverted_v) {
@@ -1304,6 +1321,36 @@ void PressChar(int vkey)
 		return;
 #endif
 	}
+
+        struct {
+                char key;
+                int spell;
+        } tbl[]= {
+                {'m', SPL_MANASHIELD},
+                {'t', SPL_TELEPORT},
+                {'p', SPL_TOWN},
+                {'n', SPL_NOVA},
+                {'s', SPL_STONE},
+                {'b', SPL_FIREBALL},
+                {'w', SPL_FIREWALL},
+                {'l', SPL_LIGHTNING},
+                {'c', SPL_CHAIN},
+        };
+
+        printf("key %c\n", vkey);
+        int i;
+        for (i=0; i < sizeof(tbl)/sizeof(tbl[0]); i++) {
+                if ((vkey | 0x20) == tbl[i].key) {
+                        printf("match index %i\n", i);
+                        if (plr[myplr]._pSplLvl[tbl[i].spell] > 0) {
+                                plr[myplr]._pRSpell = tbl[i].spell;
+                                plr[myplr]._pRSplType = RSPLTYPE_SPELL;
+                                force_redraw = 255;
+                        }
+                        break;
+                }
+        }
+
 }
 
 void LoadLvlGFX()
