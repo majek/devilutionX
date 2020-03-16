@@ -1311,6 +1311,36 @@ void PressChar(int vkey)
 		return;
 #endif
 	}
+
+        // MM spell keyboard shortcuts
+        struct {
+                char key;
+                int spell;
+        } tbl[]= {
+                {'m', SPL_MANASHIELD},
+                {'t', SPL_TELEPORT},
+                {'p', SPL_TOWN},
+                {'n', SPL_NOVA},
+                {'s', SPL_STONE},
+                {'b', SPL_FIREBALL},
+                {'w', SPL_FIREWALL},
+                {'l', SPL_LIGHTNING},
+                {'c', SPL_CHAIN},
+        };
+
+        printf("key %c\n", vkey);
+        int i;
+        for (i=0; i < sizeof(tbl)/sizeof(tbl[0]); i++) {
+                if ((vkey | 0x20) == tbl[i].key) {
+                        printf("match index %i\n", i);
+                        if (plr[myplr]._pSplLvl[tbl[i].spell] > 0) {
+                                plr[myplr]._pRSpell = tbl[i].spell;
+                                plr[myplr]._pRSplType = RSPLTYPE_SPELL;
+                                force_redraw = 255;
+                        }
+                        break;
+                }
+        }
 }
 
 void LoadLvlGFX()
