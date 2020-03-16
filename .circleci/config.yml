@@ -9,7 +9,7 @@ jobs:
       - run: apt-get update -y
       - run: apt-get install -y g++ libsdl2-dev libsdl2-mixer-dev libsdl2-ttf-dev git
       - run: apt-get install -y -t stretch-backports cmake libsodium-dev
-      - run: cd build && cmake .. -DNIGHTLY_BUILD=ON
+      - run: cd build && cmake .. -DBINARY_RELEASE=ON
       - run: cd build && cmake --build . -j $(nproc)
       - store_artifacts: {path: ./build/devilutionx, destination: devilutionx_linux_x86_64}
   linux_x86_64_test:
@@ -33,7 +33,7 @@ jobs:
       - run: apt-get update -y
       - run: apt-get install -y g++ libsdl-dev libsdl-mixer1.2-dev libsdl-ttf2.0-dev git
       - run: apt-get install -y -t stretch-backports cmake libsodium-dev
-      - run: cd build && cmake .. -DNIGHTLY_BUILD=ON -DUSE_SDL1=ON
+      - run: cd build && cmake .. -DBINARY_RELEASE=ON -DUSE_SDL1=ON
       - run: cd build && cmake --build . -j $(nproc)
       - store_artifacts: {path: ./build/devilutionx, destination: devilutionx_linux_x86_64_sdl1}
   linux_x86:
@@ -46,7 +46,7 @@ jobs:
       - run: apt-get update -y
       - run: apt-get install -y g++-multilib libsdl2-dev:i386 libsdl2-mixer-dev:i386 libsdl2-ttf-dev:i386 libsodium-dev git
       - run: apt-get install -y -t stretch-backports cmake libsodium-dev:i386
-      - run: cd build && cmake -DNIGHTLY_BUILD=ON -DCMAKE_TOOLCHAIN_FILE=../CMake/32bit.cmake ..
+      - run: cd build && cmake -DBINARY_RELEASE=ON -DCMAKE_TOOLCHAIN_FILE=../CMake/32bit.cmake ..
       - run: cd build && cmake --build . -j $(nproc)
       - store_artifacts: {path: ./build/devilutionx, destination: devilutionx_linux_x86}
   windows_x86:
@@ -67,7 +67,7 @@ jobs:
       - run: tar -xzf libsodium-1.0.17-mingw.tar.gz --no-same-owner
       - run: cp -r libsodium-win32/* /usr/i686-w64-mingw32
       - run: cp -r SDL2*/i686-w64-mingw32 /usr
-      - run: cd build && cmake -DNIGHTLY_BUILD=ON -DCMAKE_TOOLCHAIN_FILE=../CMake/mingwcc.cmake ..
+      - run: cd build && cmake -DBINARY_RELEASE=ON -DCMAKE_TOOLCHAIN_FILE=../CMake/mingwcc.cmake ..
       - run: cd build && cmake --build . -j $(nproc)
       - store_artifacts: {path: ./build/devilutionx.exe, destination: devilutionx_x86.exe}
   switch:
@@ -100,9 +100,4 @@ workflows:
   testflow:
     jobs:
       - linux_x86_64
-      - linux_x86_64_test
-      - linux_x86
       - windows_x86
-      - linux_x86_64_sdl1
-      - switch
-      - amigaos-m68k
