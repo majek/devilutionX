@@ -606,6 +606,11 @@ static void DrawItem(int x, int y, int sx, int sy, BOOL pre)
 
 void HighlightItemsNameOnMap()
 {
+        // Don't show if game is hidden by overlay windows.
+        if ((invflag || sbookflag) && (chrflag || questlog)) {
+                return;
+        }
+
 	class itemLabel
 	{
 	public:
