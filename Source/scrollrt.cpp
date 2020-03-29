@@ -382,6 +382,13 @@ static void DrawPlayer(int pnum, int x, int y, int px, int py, BYTE *pCelBuff, i
 			*/
 			return;
 		}
+                // MM: color the players to make it more obvious who is who
+                if (pnum != myplr) {
+                        DWORD hash = Hash(plr[pnum]._pName, 0) % 32;
+                        int color = 128 + hash;
+                        Cl2DrawOutline(color, px, py, pCelBuff, nCel, nWidth);
+                }
+
 		if (pnum == pcursplr)
 			Cl2DrawOutline(165, px, py, pCelBuff, nCel, nWidth);
 		if (pnum == myplr) {
