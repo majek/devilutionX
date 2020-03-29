@@ -465,9 +465,14 @@ void DrawAutomapPlr()
         {
                 int plrno;
                 for (plrno = 0; plrno < MAX_PLRS; plrno++) {
-                        if (currlevel != plr[plrno].plrlevel) {
+                        if (currlevel != plr[plrno].plrlevel || plr[plrno]._pmode == PM_QUIT) {
                                 continue;
                         }
+                        int color = COLOR_PLAYER;
+                        if (plr[plrno]._pmode == PM_DEATH) {
+                                color = PAL8_RED;
+                        }
+
                         int x = plr[plrno].WorldX;
                         int y = plr[plrno].WorldY;
                         int px = x - 2 * AutoMapXOfs - ViewX;
@@ -487,8 +492,8 @@ void DrawAutomapPlr()
                                 int t = AmLine16 / 6;
                                 int l = AmLine16 / 4;
 
-                                DrawLine(x-l, y-t, x + l, y + l, COLOR_PLAYER);
-                                DrawLine(x-l, y+l, x + l, y - t, COLOR_PLAYER);
+                                DrawLine(x-l, y-t, x + l, y + l, color);
+                                DrawLine(x-l, y+l, x + l, y - t, color);
                         }
                 }
         }
